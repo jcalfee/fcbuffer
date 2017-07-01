@@ -1,0 +1,26 @@
+{
+  "name": "fcbuffer",
+  "description": "Serialization library geared towards immutable data storage such as blockchains.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "mocha index.test.js",
+    "coverage": "istanbul cover _mocha -- -R spec index.test.js",
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
+    "browserify-mocha": "browserify index.test.js > mocha/mocha.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jcalfee/fcbuffer.git"
+  },
+  "dependencies": {
+    "bn.js": "^4.11.6",
+    "bytebuffer": "^5.0.1"
+  },
+  "devDependencies": {
+    "coveralls": "^2.13.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.4.1"
+  }
+}
