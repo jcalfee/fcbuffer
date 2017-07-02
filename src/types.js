@@ -84,11 +84,10 @@ const vector = validation => {
       for (let i = 0; i < size; i++) {
         result.push(validation.type.fromByteBuffer(b))
       }
-      return sortDefinition(result, validation.type)
+      return result
     },
     appendByteBuffer (b, value) {
       validate(value, validation)
-      value = sortDefinition(value, validation.type)
       b.writeVarint32(value.length)
       for (const o of value) {
         validation.type.appendByteBuffer(b, o)
@@ -96,7 +95,6 @@ const vector = validation => {
     },
     fromObject (value) {
       validate(value, validation)
-      value = sortDefinition(value, validation.type)
       const result = []
       for (const o of value) {
         result.push(validation.type.fromObject(o))
@@ -108,7 +106,6 @@ const vector = validation => {
         return [validation.type.toObject(value)]
       }
       validate(value, validation)
-      value = sortDefinition(value, validation.type)
 
       const result = []
       for (const o of value) {
@@ -347,22 +344,3 @@ const isEmpty = value => value == null
 const maxUnsigned = bits => new BN(1).ishln(bits).isub(ONE)
 const maxSigned = bits => new BN(1).ishln(bits - 1).isub(ONE)
 const minSigned = bits => new BN(1).ishln(bits - 1).ineg()
-
-const strCmp = (a, b) => a > b ? 1 : a < b ? -1 : 0
-const firstEl = el => Array.isArray(el) ? el[0] : el
-const sortDefinition = (array, stDefinition) => {
-  if (!Array.isArray(array)) { throw new TypeError('Expecting array') }
-
-  // console.log('definition.nosort', stDefinition.nosort)
-  return stDefinition.nosort ? array
-    : stDefinition.compare
-    ? array.sort((a, b) => stDefinition.compare(firstEl(a), firstEl(b))) // custom compare definition
-    : array.sort((a, b) =>
-      typeof firstEl(a) === 'number' && typeof firstEl(b) === 'number' ? firstEl(a) - firstEl(b)
-      // A binary string compare does not work. Performanance is very good so HEX is used..  localeCompare is another option.
-      : Buffer.isBuffer(firstEl(a)) && Buffer.isBuffer(firstEl(b))
-        ? strCmp(firstEl(a).toString('hex'), firstEl(b).toString('hex'))
-
-      : strCmp(firstEl(a).toString(), firstEl(b).toString())
-    )
-}

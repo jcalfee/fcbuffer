@@ -17,7 +17,6 @@ language added.  The definition format may change.
 - Extendable JSON structure definitions
 - Binary and JSON string serialization
 - Unit testing and code coverage
-- Deterministic sorting
 
 # Non Features
 
