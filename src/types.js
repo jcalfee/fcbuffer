@@ -38,13 +38,17 @@ const types = {
 */
 module.exports = config => {
   config = Object.assign({defaults: false, debug: false, customTypes: {}}, config)
-  const typeMap = Object.keys(Object.assign(types, config.customTypes)).reduce((map, name) => {
+  const allTypes = Object.assign(types, config.customTypes)
+
+  const createTypeReducer = (map, name) => {
     map[name] = (...args) => {
       const type = createType(name, config, ...args)
       return type
     }
     return map
-  }, {})
+  }
+  const typeMap = Object.keys(allTypes).reduce(createTypeReducer, {})
+
   typeMap.config = config
   return typeMap
 }
@@ -299,7 +303,7 @@ const time = (validation) => {
 
 const validate = (value, validation) => {
   if (isEmpty(value)) {
-    throw new Error(`Required value ${validation.typeName}`)
+    throw new Error(`Required ${validation.typeName}`)
   }
 
   if (validation.len != null) {
@@ -322,7 +326,7 @@ const ONE = new BN('1')
 
 function noOverflow (value, validation) {
   if (isEmpty(value)) {
-    throw new Error(`Required value ${validation.typeName}`)
+    throw new Error(`Required ${validation.typeName}`)
   }
   const {signed = false, bits = 54} = validation
 

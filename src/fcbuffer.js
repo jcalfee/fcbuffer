@@ -21,7 +21,7 @@ function create (definitions, types, config = types.config) {
     const typeOfValue = typeof value
     if (typeOfValue === 'object') {
       if (!base && !fields) {
-        errors.push(`Expecting ${key}.base or ${key}.fields`)
+        errors.push(`Expecting ${key}.fields or ${key}.base`)
         continue
       }
       if (base && typeof base !== 'string') {
@@ -66,7 +66,7 @@ function create (definitions, types, config = types.config) {
     }
   }
 
-    // Structs can inherit another struct, they will share the same instance
+  // Structs can inherit another struct, they will share the same instance
   for (const key in definitions) {
     const thisStruct = structs[key]
     if (!thisStruct) continue
@@ -84,13 +84,14 @@ function create (definitions, types, config = types.config) {
 
   const {Vector, Optional} = types
 
+  // Create types from a string (ex Vector[Type])
   function getTypeOrStruct (Type, typeArgs) {
     const typeatty = parseType(Type)
     if (!typeatty) return null
     const {name, arrayType, optional} = typeatty
     let ret
     if (arrayType == null) {
-            // AnyType
+      // AnyType
       const fieldStruct = structs[name]
       if (fieldStruct) { return fieldStruct }
 

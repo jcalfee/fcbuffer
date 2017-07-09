@@ -17,7 +17,7 @@ const {create, fromBuffer, toBuffer} = require('./src/fcbuffer')
 */
 
 /**
-  @arg {object} definitions - examples https://github.com/eosjs/json/blob/master/schema/operations.json
+  @arg {object} definitions - examples https://github.com/eosjs/json/blob/master/schema/generated.json
   @arg {SerializerConfig} config
   @return {CreateStruct}
 */

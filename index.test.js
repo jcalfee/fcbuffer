@@ -139,7 +139,7 @@ describe('API', function () {
 describe('JSON', function () {
   it('Structure', function () {
     assertCompile({Struct: {fields: {checksum: 'FixedBytes32'}}})
-    throws(() => assertCompile({Struct: {}}), /Expecting Struct.base or Struct.fields/)
+    throws(() => assertCompile({Struct: {}}), /Expecting Struct.fields or Struct.base/)
     throws(() => assertCompile({Struct: {base: {obj: 'val'}}}), /Expecting string/)
     throws(() => assertCompile({Struct: {fields: 'String'}}), /Expecting object/)
     throws(() => assertCompile({Struct: {fields: {name: {obj: 'val'}}}}), /Expecting string in/)

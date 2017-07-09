@@ -93,7 +93,7 @@ AccountPermission.toObject()
 # References
 
 - Built-in Types: [types.js](./src/types.js)
-- EOS Definitions: [operations.json](https://github.com/eosjs/json/blob/master/schema/operations.json)
+- EOS Definitions: [generated.json](https://github.com/eosjs/json/blob/master/schema/generated.json)
 
 # Environment
 
