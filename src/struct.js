@@ -1,7 +1,18 @@
 const ByteBuffer = require('bytebuffer')
 
-/** @class Struct */
+/**
+  @class Struct
+
+  @arg {object} config.override = {
+    'Message.data.appendByteBuffer': ({fields, object, b}) => {..}
+  }
+  Rare cases where specialized serilization is needed (ex A Message object has
+  'type' and 'data' fields where object.type === 'transfer' can define
+  serialization time Struct needed for 'data' .. This saves complexity for the
+  end-user's working with json.  See override unit test.
+*/
 module.exports = (name, config = {debug: false}) => {
+  config = Object.assign({override: {}}, config)
   const fields = {}
   return {
     /** @private */
@@ -36,7 +47,12 @@ module.exports = (name, config = {debug: false}) => {
               // structPtr
               object = type.fromByteBuffer(b, config)
             } else {
-              object[field] = type.fromByteBuffer(b, config)
+              const fromByteBuffer = config.override[`${name}.${field}.fromByteBuffer`]
+              if(fromByteBuffer) {
+                fromByteBuffer({fields, object, b, config})
+              } else {
+                object[field] = type.fromByteBuffer(b, config)
+              }
             }
           } catch (e) {
             e.message += ` (${name}.${field})`
@@ -61,7 +77,12 @@ module.exports = (name, config = {debug: false}) => {
             // structPtr
             type.appendByteBuffer(b, object)
           } else {
-            type.appendByteBuffer(b, object[field])
+            const appendByteBuffer = config.override[`${name}.${field}.appendByteBuffer`]
+            if(appendByteBuffer) {
+              appendByteBuffer({fields, object, b})
+            } else {
+              type.appendByteBuffer(b, object[field])
+            }
           }
         }
       } catch (error) {
@@ -85,9 +106,14 @@ module.exports = (name, config = {debug: false}) => {
             const object = type.fromObject(serializedObject)
             result = Object.assign(result, object)
           } else {
-            const value = serializedObject[field]
-            const object = type.fromObject(value)
-            result[field] = object
+            const fromObject = config.override[`${name}.${field}.fromObject`]
+            if(fromObject) {
+              fromObject({fields, serializedObject, result})
+            } else {
+              const value = serializedObject[field]
+              const object = type.fromObject(value)
+              result[field] = object
+            }
           }
         }
       } catch (error) {
@@ -107,12 +133,17 @@ module.exports = (name, config = {debug: false}) => {
         for (field in fields) {
           const type = fields[field]
 
-          const object = type.toObject(serializedObject ? serializedObject[field] : null, config)
-          if (field === '') {
-            // structPtr
-            result = Object.assign(result, object)
+          const toObject = config.override[`${name}.${field}.toObject`]
+          if(toObject) {
+            toObject({fields, serializedObject, result, config})
           } else {
-            result[field] = object
+            const object = type.toObject(serializedObject ? serializedObject[field] : null, config)
+            if (field === '') {
+              // structPtr
+              result = Object.assign(result, object)
+            } else {
+              result[field] = object
+            }
           }
 
           if (config.debug) {

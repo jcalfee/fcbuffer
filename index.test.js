@@ -1,9 +1,10 @@
 /* eslint-env mocha */
 const assert = require('assert')
 
+const Fcbuffer = require('.')
 const Types = require('./src/types')
 const Struct = require('./src/struct')
-const {create, toBuffer, fromBuffer} = require('./src/fcbuffer')
+const {create} = require('./src/fcbuffer')
 
 describe('API', function () {
   it('Bytes', function () {
@@ -203,11 +204,62 @@ describe('JSON', function () {
   it('Errors', function () {
     const {structs} = create({Struct: {fields: {age: 'String'}}}, Types({defaults: true}))
     const type = structs.Struct
-    throws(() => fromBuffer(type, Buffer.from('')), /Illegal offset/)
+    throws(() => Fcbuffer.fromBuffer(type, Buffer.from('')), /Illegal offset/)
   })
 })
 
-function assertCompile (definitions, config = {defaults: true, debug: false}) {
+describe('Override', function () {
+  it('Struct', function () {
+    const definitions = {
+      Message: {
+        fields: {
+          type: 'String', // another definition (like transfer)
+          data: 'Bytes'
+        }
+      },
+      transfer: {
+        fields: {
+          from: 'String',
+          to: 'String'
+        }
+      }
+    }
+    const config = {
+      override: {
+        'Message.data.fromByteBuffer': ({fields, object, b, config}) => {
+          const ser = (object.type || '') == '' ? fields.data : structs[object.type]
+          object.data = ser.fromByteBuffer(b, config)
+        },
+        'Message.data.appendByteBuffer': ({fields, object, b}) => {
+          const ser = (object.type || '') == '' ? fields.data : structs[object.type]
+          ser.appendByteBuffer(b, object.data)
+        },
+        'Message.data.fromObject': ({fields, serializedObject, result}) => {
+          const {data, type} = serializedObject
+          const ser = (type || '') == '' ? fields.data : structs[type]
+          result.data = ser.fromObject(data)
+        },
+        'Message.data.toObject': ({fields, serializedObject, result, config}) => {
+          const {data, type} = serializedObject || {}
+          const ser = (type || '') == '' ? fields.data : structs[type]
+          result.data = ser.toObject(data, config)
+        },
+      }
+    }
+    const {structs, errors} = create(definitions, Types(config))
+    assert.equal(errors.length, 0)
+    assertSerializer(structs.Message, {
+      type: 'transfer',
+      data: {
+        from: 'slim',
+        to: 'charles'
+      }
+    })
+  })
+})
+
+function assertCompile (definitions, config) {
+  config = Object.assign({defaults: true, debug: false}, config)
   const {errors, structs} = create(definitions, Types(config))
   assert.equal(errors.length, 0, errors[0])
   assert(Object.keys(structs).length > 0, 'expecting struct(s)')
@@ -221,8 +273,8 @@ function assertCompile (definitions, config = {defaults: true, debug: false}) {
 
 function assertSerializer (type, value) {
   const obj = type.fromObject(value) // tests fromObject
-  const buf = toBuffer(type, obj) // tests appendByteBuffer
-  const obj2 = fromBuffer(type, buf) // tests fromByteBuffer
+  const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
+  const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
 
   // tests toObject
   deepEqual(value, type.toObject(obj), 'serialize object')
