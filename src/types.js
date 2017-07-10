@@ -233,7 +233,7 @@ const bytebuf = (validation) => {
 
 const string = (validation) => ({
   fromByteBuffer (b) {
-    return Buffer.from(b.readVString(), 'utf8')
+    return b.readVString()
   },
   appendByteBuffer (b, value) {
     validate(value, validation)
@@ -241,14 +241,14 @@ const string = (validation) => ({
   },
   fromObject (value) {
     validate(value, validation)
-    return Buffer.from(value, 'utf8')
+    return value
   },
   toObject (value) {
     if (validation.defaults && value == null) {
       return ''
     }
     validate(value, validation)
-    return value.toString('utf8')
+    return value
   }
 })
 
