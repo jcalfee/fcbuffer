@@ -25,6 +25,14 @@ module.exports = (definitions, config) => {
   if(typeof definitions !== 'object') {
     throw new TypeError('definitions is a required parameter')
   }
+ 
+  if(config.customTypes) {
+    definitions = Object.assign({}, definitions) //clone
+    for(const key in config.customTypes) { // custom types overwrite definations
+      delete definitions[key]
+    }
+  }
+
   const types = Types(config)
   const {errors, structs} = create(definitions, types)
   const extend = (parent, child) => {
