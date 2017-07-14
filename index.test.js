@@ -1,5 +1,6 @@
 /* eslint-env mocha */
 const assert = require('assert')
+const ByteBuffer = require('bytebuffer')
 
 const Fcbuffer = require('.')
 const Types = require('./src/types')
@@ -228,11 +229,15 @@ describe('Override', function () {
       override: {
         'Message.data.fromByteBuffer': ({fields, object, b, config}) => {
           const ser = (object.type || '') == '' ? fields.data : structs[object.type]
+          b.readVarint32()
           object.data = ser.fromByteBuffer(b, config)
         },
         'Message.data.appendByteBuffer': ({fields, object, b}) => {
           const ser = (object.type || '') == '' ? fields.data : structs[object.type]
-          ser.appendByteBuffer(b, object.data)
+          const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
+          ser.appendByteBuffer(b2, object.data)
+          b.writeVarint32(b2.offset)
+          b.append(b2.copy(0, b2.offset), 'binary')
         },
         'Message.data.fromObject': ({fields, serializedObject, result}) => {
           const {data, type} = serializedObject
