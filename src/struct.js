@@ -147,13 +147,25 @@ module.exports = (name, config = {debug: false}) => {
           }
 
           if (config.debug) {
-            let b = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-            if (serializedObject != null) {
-              const value = serializedObject[field]
-              if (value) { type.appendByteBuffer(b, value) }
+            try {
+
+              let b = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
+              if (serializedObject != null) {
+                const value = serializedObject[field]
+                if (value) {
+                  const appendByteBuffer = config.override[`${name}.${field}.appendByteBuffer`]
+                  if(toObject && appendByteBuffer) { // FIXME
+                    appendByteBuffer({fields, serializedObject, b})
+                  } else {
+                    type.appendByteBuffer(b, value)
+                  }
+                }
+              }
+              b = b.copy(0, b.offset)
+              console.error(name + '.' + field, b.toHex())
+            } catch(error) { // work-around to prevent debug time crash
+              console.error('DEBUG', name + '.' + field, error.toString())
             }
-            b = b.copy(0, b.offset)
-            console.error(name + '.' + field, b.toHex())
           }
         }
       } catch (error) {

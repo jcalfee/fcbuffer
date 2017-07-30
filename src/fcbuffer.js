@@ -185,10 +185,10 @@ function toBuffer (type, value) {
   return Buffer.from(toByteBuffer(type, struct).toBinary(), 'binary')
 }
 
-function fromBuffer (type, buffer) {
+function fromBuffer (type, buffer, toObject = true) {
   const b = ByteBuffer.fromBinary(buffer.toString('binary'), ByteBuffer.LITTLE_ENDIAN)
   const struct = type.fromByteBuffer(b)
-  return type.toObject(struct)
+  return toObject ? type.toObject(struct) : struct
 }
 
 function toByteBuffer (type, value) {

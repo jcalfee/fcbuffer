@@ -28,6 +28,7 @@ language added.  The definition format may change.
 
 ```javascript
 Fcbuffer = require('fcbuffer') // or: Fcbuffer = require('.')
+
 assert = require('assert')
 
 const definitions = {

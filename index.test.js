@@ -280,10 +280,10 @@ function assertSerializer (type, value) {
   const obj = type.fromObject(value) // tests fromObject
   const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
   const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
+  const obj3 = type.toObject(obj) // tests toObject
 
-  // tests toObject
-  deepEqual(value, type.toObject(obj), 'serialize object')
-  deepEqual(type.toObject(obj), obj2, 'serialize buffer')
+  deepEqual(value, obj3, 'serialize object')
+  deepEqual(obj3, obj2, 'serialize buffer')
 }
 
 function assertRequired (type) {
