@@ -21,11 +21,11 @@ const {create, fromBuffer, toBuffer} = require('./src/fcbuffer')
   @arg {SerializerConfig} config
   @return {CreateStruct}
 */
-module.exports = (definitions, config) => {
+module.exports = (definitions, config = {}) => {
   if(typeof definitions !== 'object') {
     throw new TypeError('definitions is a required parameter')
   }
- 
+
   if(config.customTypes) {
     definitions = Object.assign({}, definitions) //clone
     for(const key in config.customTypes) { // custom types overwrite definations

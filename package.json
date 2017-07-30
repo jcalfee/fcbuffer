@@ -1,7 +1,7 @@
 {
   "name": "fcbuffer",
   "description": "Serialization library geared towards immutable data storage such as blockchains.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
